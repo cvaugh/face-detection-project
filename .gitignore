@@ -1,0 +1,8 @@
+filtered/
+.vscode/
+5_detector_code_backup.zip
+Output_FaceDetector_Table1.csv
+__pycache__/
+*.py[cod]
+*$py.class
+5_detector_code/
