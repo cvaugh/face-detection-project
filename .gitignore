@@ -6,3 +6,4 @@ __pycache__/
 *.py[cod]
 *$py.class
 5_detector_code/
+failed_case*.log
