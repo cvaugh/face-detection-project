@@ -11,14 +11,14 @@ from tqdm import tqdm
 
 class BFDataset(Dataset):
     def __init__(self, paths, resize=(128, 128)):
-        self.paths = paths
+        self.images = fd_wrapper.load_images(paths, resize)
         self.resize = resize
     
     def __len__(self):
-        return len(self.paths)
+        return len(self.images)
     
     def __getitem__(self, idx):
-        return from_numpy(np.array(fd_wrapper.load_image(self.paths[idx], self.resize))).permute((2, 0, 1))
+        return from_numpy(np.array(self.images[idx].resize(self.resize))).permute((2, 0, 1))
 
 def create_instance(weights=path.join(blazeface_path, "blazeface.pth"), anchors=path.join(blazeface_path, "anchors.npy"),
                     min_score_threshold=0.75, min_suppression_threshold=0.3):
