@@ -1,5 +1,5 @@
 import fd_wrapper as wrapper
-from fd_wrapper import blazeface
+from fd_wrapper import ssd
 
 # This prevents unexpected behavior when using multithreading
 if __name__ != "__main__":
@@ -11,25 +11,18 @@ dataset_path = wrapper.relative_path("../filtered/flickr_1.2")
 paths = wrapper.read_dataset(dataset_path)
 print("Found", len(paths), "images")
 
-# Uncomment this statement to load all images into memory at once
-# Not recommended as it requires >64GB of memory
-#images = load_images(paths)
-
 # Small subset of images for testing
 paths_subset = paths[:4096]
 
-# to do: load images in batches as needed
-images = wrapper.load_images(paths_subset)
+instance = ssd.create_instance()
 
-bf = blazeface.create_instance()
-
-results_blazeface = blazeface.classify(bf, images)
+results = ssd.classify(instance, paths_subset)
 
 failed_cases = ""
 
 for i in range(len(paths_subset)):
-    if not results_blazeface[i]:
+    if not results[i]:
         failed_cases += paths_subset[i] + "\n"
 
-with open("failed_cases_blazeface.log", "w") as f:
+with open("failed_cases.log", "w") as f:
     f.writelines(failed_cases)

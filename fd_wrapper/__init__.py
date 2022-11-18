@@ -11,25 +11,25 @@ def relative_path(path):
 
 # Read faces dataset to a list of paths
 # Ignores file paths that do not end in .jpg
-def read_dataset(root_dir):
+def read_dataset(root_dir, filename_pattern="*.jpg"):
     paths = []
     progress = tqdm(os.walk(root_dir))
     progress.set_description("Scanning for images")
     for root, dirs, files in progress:
-        for path in filter(files, "*.jpg"):
+        for path in filter(files, filename_pattern):
             path = os.path.join(root, path)
             paths.append(path)
     return paths
 
-def __load_image(file, image_size):
-    img = Image.open(file).convert("RGB")
+def load_image(path, image_size):
+    img = Image.open(path).convert("RGB")
     return img if image_size is None else img.resize(image_size)
 
-def load_images(files, image_size=None, silent=False):
+def load_images(paths, image_size=None, silent=False):
     if silent:
-        if not isinstance(files, list): files = [files]
-        return [__load_image(file, image_size) for file in files]
+        if not isinstance(paths, list): paths = [paths]
+        return [load_image(path, image_size) for path in paths]
     else:
-        progress = tqdm(load_images(files, image_size, silent=True), total=len(files))
+        progress = tqdm(load_images(paths, image_size, silent=True), total=len(paths))
         progress.set_description("Loading images")
         return [image for image in progress]
