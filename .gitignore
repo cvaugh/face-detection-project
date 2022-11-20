@@ -8,3 +8,5 @@ __pycache__/
 5_detector_code/
 failed_case*.log
 known/
+result*.csv
+experiments/

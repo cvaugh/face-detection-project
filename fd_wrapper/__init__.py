@@ -13,7 +13,7 @@ def relative_path(path):
 # Ignores file paths that do not end in .jpg
 def read_dataset(root_dir, filename_pattern="*.jpg"):
     paths = []
-    progress = tqdm(os.walk(root_dir))
+    progress = tqdm(os.walk(root_dir), unit="dir")
     progress.set_description("Scanning for images")
     for root, dirs, files in progress:
         for path in filter(files, filename_pattern):
