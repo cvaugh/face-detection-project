@@ -5,6 +5,7 @@ from fd_wrapper import retinaface
 from fd_wrapper import ssd
 from time import time
 from datetime import timedelta
+from numpy import mean
 
 if __name__ != "__main__":
     exit()
@@ -28,6 +29,9 @@ retinaface_instance = retinaface.create_instance()
 
 results = [None] * batch_count
 
+first_start_time = time()
+durations = []
+
 # to do: multithreading
 for i in range(batch_count):
     print("\nBatch", (i + 1), "of", batch_count)
@@ -45,7 +49,16 @@ for i in range(batch_count):
         "retinaface": results_retinaface,
         "ssd": results_ssd
     }
-    print("Finished in", str(timedelta(seconds=time() - start_time)))
+    end_time = time()
+    duration = end_time - start_time
+    durations.append(duration)
+    avg = mean(durations)
+    print("Completed in", str(timedelta(seconds=duration)),
+        "(total:", str(timedelta(seconds=end_time - first_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
+        "remaining: ~" + str(timedelta(seconds=avg * (batch_count - i - 1))) + ")")
+
+
+print("\nBatches completed in", str(timedelta(seconds=time() - first_start_time)))
 
 results_full = {
     "blazeface": [],
