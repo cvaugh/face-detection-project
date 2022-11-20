@@ -1,6 +1,6 @@
 import fd_wrapper as wrapper
-#from fd_wrapper import ssd
-from fd_wrapper import mtcnn
+from fd_wrapper import ssd
+#from fd_wrapper import mtcnn
 #from fd_wrapper import blazeface
 #from fd_wrapper import retinaface
 
@@ -15,21 +15,13 @@ paths = wrapper.read_dataset(dataset_path)
 print("Found", len(paths), "images")
 
 # Small subset of images for testing
-#paths_subset = paths[:4096]
+paths_subset = paths[:4096]
 
-instance = mtcnn.create_instance()
+images = wrapper.load_images(paths_subset)
 
-results = mtcnn.classify(instance, paths)
+instance = ssd.create_instance()
 
-def write_failed_cases(results):
-    failed_cases = ""
-
-    for i in range(len(paths)):
-        if not results[i]:
-            failed_cases += paths[i] + "\n"
-
-    with open("failed_cases.log", "w") as f:
-        f.writelines(failed_cases)
+results = ssd.classify(instance, images)
 
 def write_results(results, known=False):
     with open("results.csv", "w") as f:

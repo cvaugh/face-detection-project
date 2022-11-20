@@ -10,15 +10,14 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
 class BFDataset(Dataset):
-    def __init__(self, paths, resize=(128, 128)):
-        self.images = fd_wrapper.load_images(paths, resize)
-        self.resize = resize
+    def __init__(self, images):
+        self.images = [image.resize((128, 128)) for image in images]
     
     def __len__(self):
         return len(self.images)
     
     def __getitem__(self, idx):
-        return from_numpy(np.array(self.images[idx].resize(self.resize))).permute((2, 0, 1))
+        return from_numpy(np.array(self.images[idx])).permute((2, 0, 1))
 
 def create_instance(weights=path.join(blazeface_path, "blazeface.pth"), anchors=path.join(blazeface_path, "anchors.npy"),
                     min_score_threshold=0.75, min_suppression_threshold=0.3):
@@ -30,9 +29,9 @@ def create_instance(weights=path.join(blazeface_path, "blazeface.pth"), anchors=
     return instance
 
 
-def classify(instance, paths, batch_size=512, num_workers=0):
-    if not isinstance(paths, list): paths = [paths]
-    dl = DataLoader(BFDataset(paths), num_workers=num_workers, pin_memory=True, shuffle=False, batch_size=min(len(paths), batch_size))
+def classify(instance, images, batch_size=512, num_workers=0):
+    if not isinstance(images, list): images = [images]
+    dl = DataLoader(BFDataset(images), num_workers=num_workers, pin_memory=True, shuffle=False, batch_size=min(len(images), batch_size))
     results = []
     # to do: optimize this loop
     progress = tqdm(dl)

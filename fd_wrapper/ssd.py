@@ -16,12 +16,12 @@ def __classify_image(instance, image, target_size=(300, 300)):
 
     return ((detections[:, :, :, 1]==1 ) & (detections[:, :, :, 2]>=0.9)).any()
 
-def classify(instance, paths, target_size=(300, 300)):
-    if not isinstance(paths, list): paths = [paths]
+def classify(instance, images, target_size=(300, 300)):
+    if not isinstance(images, list): paths = [paths]
     results = []
     # to do: multithreading/optimization
-    progress = tqdm(paths)
+    progress = tqdm(images)
     progress.set_description("Classifying images")
-    for path in progress:
-        results.append(__classify_image(instance, fd_wrapper.load_image(path, target_size), target_size))
+    for image in progress:
+        results.append(__classify_image(instance, image.resize(target_size), target_size))
     return results

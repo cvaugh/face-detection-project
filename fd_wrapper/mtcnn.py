@@ -6,14 +6,14 @@ from tqdm import tqdm
 def create_instance(select_largest=False):
     return MTCNN(select_largest=select_largest)
 
-def classify(instance, paths):
-    if not isinstance(paths, list): paths = [paths]
-    images = [np.array(Image.open(path).convert("RGB")) for path in paths]
+def classify(instance, images):
+    if not isinstance(images, list): images = [images]
 
+    # to do: resolve "VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences"
     output = instance(images)
 
-    results = [None] * len(paths)
+    results = [None] * len(images)
     
-    for index, (out, path) in tqdm(enumerate(zip(output, paths)), total=len(paths)):
+    for index, (out, path) in tqdm(enumerate(zip(output, images)), total=len(images)):
         results[index] = int(out is not None)
     return results

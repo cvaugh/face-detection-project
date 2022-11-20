@@ -21,7 +21,7 @@ def read_dataset(root_dir, filename_pattern="*.jpg"):
             paths.append(path)
     return paths
 
-def load_image(path, image_size):
+def load_image(path, image_size=None):
     img = Image.open(path).convert("RGB")
     return img if image_size is None else img.resize(image_size)
 
