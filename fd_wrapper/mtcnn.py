@@ -14,6 +14,8 @@ def classify(instance, images):
 
     results = [None] * len(images)
     
-    for index, (out, path) in tqdm(enumerate(zip(output, images)), total=len(images)):
-        results[index] = int(out is not None)
+    progress = tqdm(enumerate(zip(output, images)), total=len(images))
+    progress.set_description("[MTCNN] Classifying images")
+    for index, (out, path) in progress:
+        results[index] = out is not None
     return results
