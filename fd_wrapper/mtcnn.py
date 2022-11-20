@@ -6,8 +6,10 @@ from tqdm import tqdm
 def create_instance(select_largest=False):
     return MTCNN(select_largest=select_largest)
 
-def classify(instance, images):
+def classify(instance, images, resize=(512, 512)):
     if not isinstance(images, list): images = [images]
+
+    images = [image.resize(resize) for image in images]
 
     # to do: resolve "VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences"
     output = instance(images)
