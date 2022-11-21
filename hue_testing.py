@@ -7,7 +7,7 @@ from csv import reader
 import matplotlib.pyplot as plt
 from colorsys import hsv_to_rgb
 
-results_dir = wrapper.relative_path("./results_100", root=__file__)
+results_dir = wrapper.relative_path("./results_200", root=__file__)
 
 paths = []
 for root, dirs, files in os.walk(results_dir):
@@ -22,7 +22,7 @@ shifts = np.sort(shifts)
 
 entries = [None] * len(paths_sorted)
 
-for i in range(len(entries)):
+for i in tqdm(range(len(entries))):
     entry = {"shift": shifts[i], "results": []}
     with open(paths_sorted[i]) as f:
         next(f)

@@ -11,3 +11,4 @@ known/
 result*.csv
 experiments/
 result*/
+pillow_testing.py

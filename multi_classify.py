@@ -4,13 +4,16 @@ from time import time
 from datetime import timedelta
 import numpy as np
 from PIL import Image
+from pathlib import Path
+from os.path import dirname
+from tqdm import tqdm
 
 if __name__ != "__main__":
     exit()
 
 #dataset_path = wrapper.relative_path("./filtered/flickr_1.2", root=__file__)
-dataset_path = wrapper.relative_path("./known/20", root=__file__)
-#dataset_path = wrapper.relative_path("./experiments", root=__file__)
+dataset_path = wrapper.relative_path("./known/200", root=__file__)
+#dataset_path = wrapper.relative_path("./experiments/b", root=__file__)
 
 paths = wrapper.read_dataset(dataset_path)
 
@@ -24,7 +27,7 @@ print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count
 ssd_instance = ssd.create_instance()
 mtcnn_instance = mtcnn.create_instance()
 blazeface_instance = blazeface.create_instance()
-#retinaface_instance = retinaface.create_instance()
+retinaface_instance = retinaface.create_instance()
 
 initial_start_time = time()
 
@@ -41,13 +44,15 @@ def classify(transform=None, **kwargs):
         images = wrapper.load_images(batches[i])
 
         if transform is not None:
-            images = [transform(image, kwargs) for image in images]
+            progress = tqdm(images)
+            progress.set_description("Transforming images")
+            images = [transform(image, kwargs) for image in progress]
 
         results_blazeface = blazeface.classify(blazeface_instance, images)
         results_mtcnn = mtcnn.classify(mtcnn_instance, images)
+        results_ssd = ssd.classify(ssd_instance, images)
         #results_retinaface = retinaface.classify(retinaface_instance, images)
         results_retinaface = [False] * len(images)
-        results_ssd = ssd.classify(ssd_instance, images)
 
         results[i] = {
             "blazeface": results_blazeface,
@@ -81,6 +86,7 @@ def classify(transform=None, **kwargs):
     return results_full
 
 def write_results(paths, results, path="results.csv", known=False):
+    Path(dirname(path)).mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         if known:
             lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD, Actual\n"
@@ -100,12 +106,14 @@ def write_results(paths, results, path="results.csv", known=False):
 
 def hue_rotation(image, kwargs):
     img = np.array(image.convert(mode="HSV"))
-    img[..., 0] = int(kwargs.get("shift")) % 360
+    img[..., 0] = int(kwargs.get("rot")) % 256
     img[..., 1] = 96
     return Image.fromarray(img, "HSV").convert("RGB")
 
-for i in range(0, 255):
-    print("\n(" + str(i) + "/255) ", end="")
-    write_results(paths, classify(transform=hue_rotation, shift=i), path="results/" + str(i) + ".csv", known=True)
+for i in range(0, 256):
+    print("\n(" + str(i) + "/256) ", end="")
+    write_results(paths, classify(transform=hue_rotation, rot=i), path="results/" + str(i) + ".csv", known=True)
+
+#write_results(paths, classify(), path="results.csv", known=True)
 
 print("\n\nCompleted in", str(timedelta(seconds=time() - initial_start_time)))
