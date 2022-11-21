@@ -1,21 +1,20 @@
 import fd_wrapper as wrapper
-from fd_wrapper import blazeface
-from fd_wrapper import mtcnn
-from fd_wrapper import retinaface
-from fd_wrapper import ssd
+from fd_wrapper import *
 from time import time
 from datetime import timedelta
-from numpy import mean
+import numpy as np
+from PIL import Image
 
 if __name__ != "__main__":
     exit()
 
-#dataset_path = wrapper.relative_path("../filtered/flickr_1.2")
-dataset_path = wrapper.relative_path("../known")
+#dataset_path = wrapper.relative_path("./filtered/flickr_1.2", root=__file__)
+dataset_path = wrapper.relative_path("./known/20", root=__file__)
+#dataset_path = wrapper.relative_path("./experiments", root=__file__)
 
 paths = wrapper.read_dataset(dataset_path)
 
-batch_size = 100
+batch_size = len(paths)
 
 # Small subset of images for testing
 batches = [paths[i:i + batch_size] for i in range(0, len(paths), batch_size)]
@@ -27,54 +26,61 @@ mtcnn_instance = mtcnn.create_instance()
 blazeface_instance = blazeface.create_instance()
 retinaface_instance = retinaface.create_instance()
 
+st = time()
+
 results = [None] * batch_count
 
-first_start_time = time()
-durations = []
+def classify(transform=None, **kwargs):
+    first_start_time = time()
+    durations = []
 
-# to do: multithreading
-for i in range(batch_count):
-    print("\nBatch", (i + 1), "of", batch_count)
-    start_time = time()
-    images = wrapper.load_images(batches[i])
+    # to do: multithreading
+    for i in range(batch_count):
+        print("Batch", (i + 1), "of", batch_count)
+        start_time = time()
+        images = wrapper.load_images(batches[i])
 
-    results_blazeface = blazeface.classify(blazeface_instance, images)
-    results_mtcnn = mtcnn.classify(mtcnn_instance, images)
-    results_ssd = ssd.classify(ssd_instance, images)
-    results_retinaface = retinaface.classify(retinaface_instance, images)
+        if transform is not None:
+            images = [transform(image, kwargs) for image in images]
 
-    results[i] = {
-        "blazeface": results_blazeface,
-        "mtcnn": results_mtcnn,
-        "retinaface": results_retinaface,
-        "ssd": results_ssd
+        results_blazeface = blazeface.classify(blazeface_instance, images)
+        results_mtcnn = mtcnn.classify(mtcnn_instance, images)
+        results_ssd = ssd.classify(ssd_instance, images)
+        results_retinaface = retinaface.classify(retinaface_instance, images)
+
+        results[i] = {
+            "blazeface": results_blazeface,
+            "mtcnn": results_mtcnn,
+            "retinaface": results_retinaface,
+            "ssd": results_ssd
+        }
+        end_time = time()
+        duration = end_time - start_time
+        durations.append(duration)
+        avg = np.mean(durations)
+        print("Completed in", str(timedelta(seconds=duration)),
+            "(total:", str(timedelta(seconds=end_time - first_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
+            "remaining: ~" + str(timedelta(seconds=avg * (batch_count - i - 1))) + ")")
+
+    print("\nBatches completed in", str(timedelta(seconds=time() - first_start_time)))
+
+    results_full = {
+        "blazeface": [],
+        "mtcnn": [],
+        "retinaface": [],
+        "ssd": []
     }
-    end_time = time()
-    duration = end_time - start_time
-    durations.append(duration)
-    avg = mean(durations)
-    print("Completed in", str(timedelta(seconds=duration)),
-        "(total:", str(timedelta(seconds=end_time - first_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
-        "remaining: ~" + str(timedelta(seconds=avg * (batch_count - i - 1))) + ")")
 
+    for entry in results:
+        results_full["blazeface"].extend(entry["blazeface"])
+        results_full["mtcnn"].extend(entry["mtcnn"])
+        results_full["retinaface"].extend(entry["retinaface"])
+        results_full["ssd"].extend(entry["ssd"])
+    
+    return results_full
 
-print("\nBatches completed in", str(timedelta(seconds=time() - first_start_time)))
-
-results_full = {
-    "blazeface": [],
-    "mtcnn": [],
-    "retinaface": [],
-    "ssd": []
-}
-
-for entry in results:
-    results_full["blazeface"].extend(entry["blazeface"])
-    results_full["mtcnn"].extend(entry["mtcnn"])
-    results_full["retinaface"].extend(entry["retinaface"])
-    results_full["ssd"].extend(entry["ssd"])
-
-def write_results(paths, results, known=False):
-    with open("results.csv", "w") as f:
+def write_results(paths, results, path="results.csv", known=False):
+    with open(path, "w") as f:
         if known:
             lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD, Actual\n"
         else:
@@ -91,4 +97,14 @@ def write_results(paths, results, known=False):
                 lines += paths[i] + ", " + blazeface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + "\n"
         f.writelines(lines)
 
-write_results(paths, results_full, known=True)
+def hue_rotation(image, kwargs):
+    img = np.array(image.convert(mode="HSV"))
+    img[..., 0] = int(kwargs.get("shift")) % 360
+    img[..., 1] = 96
+    return Image.fromarray(img, "HSV").convert("RGB")
+
+for i in range(0, 255):
+    print("\n(" + str(int(i / 4)) + "/255) ", end="")
+    write_results(paths, classify(transform=hue_rotation, shift=i), path="results/" + str(i) + ".csv", known=True)
+
+print("\n\nCompleted in", str(timedelta(seconds=time() - st)))

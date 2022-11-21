@@ -6,8 +6,8 @@ from fnmatch import filter
 __all__ = ["blazeface", "mtcnn", "retinaface", "ssd"]
 
 # OS-independent way to get a path relative to the current file
-def relative_path(path):
-    return os.path.join(os.path.dirname(__file__), path)
+def relative_path(path, root=__file__):
+    return os.path.join(os.path.dirname(root), path)
 
 # Read faces dataset to a list of paths
 # Ignores file paths that do not end in .jpg
@@ -17,8 +17,7 @@ def read_dataset(root_dir, filename_pattern="*.jpg"):
     progress.set_description("Scanning for images")
     for root, dirs, files in progress:
         for path in filter(files, filename_pattern):
-            path = os.path.join(root, path)
-            paths.append(path)
+            paths.append(os.path.join(root, path))
     return paths
 
 def load_image(path, image_size=None):

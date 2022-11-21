@@ -10,3 +10,4 @@ failed_case*.log
 known/
 result*.csv
 experiments/
+result*/
