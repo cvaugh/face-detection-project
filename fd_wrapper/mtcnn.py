@@ -11,13 +11,15 @@ def classify(instance, images, resize=(512, 512)):
 
     images = [image.resize(resize) for image in images]
 
-    # to do: resolve "VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences"
+    print("[MTCNN] Classifying images...", end="\r")
     output = instance(images)
 
     results = [None] * len(images)
     
-    progress = tqdm(enumerate(zip(output, images)), total=len(images))
-    progress.set_description("[MTCNN] Classifying images")
-    for index, (out, path) in progress:
+    progress = tqdm(total=len(images))
+    progress.set_description("[MTCNN] Processing results")
+    for index, (out, path) in enumerate(zip(output, images)):
         results[index] = out is not None
+        progress.update()
+    progress.close()
     return results
