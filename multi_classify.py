@@ -19,19 +19,19 @@ batch_size = len(paths)
 # Small subset of images for testing
 batches = [paths[i:i + batch_size] for i in range(0, len(paths), batch_size)]
 batch_count = len(batches)
-print("Found", len(paths), "images (" + str(batch_count), "batches of size", str(batch_size) + ")")
+print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count == 1 else "batches", "of size", str(batch_size) + ")")
 
 ssd_instance = ssd.create_instance()
 mtcnn_instance = mtcnn.create_instance()
 blazeface_instance = blazeface.create_instance()
-retinaface_instance = retinaface.create_instance()
+#retinaface_instance = retinaface.create_instance()
 
-st = time()
+initial_start_time = time()
 
 results = [None] * batch_count
 
 def classify(transform=None, **kwargs):
-    first_start_time = time()
+    batch_start_time = time()
     durations = []
 
     # to do: multithreading
@@ -45,8 +45,9 @@ def classify(transform=None, **kwargs):
 
         results_blazeface = blazeface.classify(blazeface_instance, images)
         results_mtcnn = mtcnn.classify(mtcnn_instance, images)
+        #results_retinaface = retinaface.classify(retinaface_instance, images)
+        results_retinaface = [False] * len(images)
         results_ssd = ssd.classify(ssd_instance, images)
-        results_retinaface = retinaface.classify(retinaface_instance, images)
 
         results[i] = {
             "blazeface": results_blazeface,
@@ -59,10 +60,10 @@ def classify(transform=None, **kwargs):
         durations.append(duration)
         avg = np.mean(durations)
         print("Completed in", str(timedelta(seconds=duration)),
-            "(total:", str(timedelta(seconds=end_time - first_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
+            "(total:", str(timedelta(seconds=end_time - batch_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
             "remaining: ~" + str(timedelta(seconds=avg * (batch_count - i - 1))) + ")")
 
-    print("\nBatches completed in", str(timedelta(seconds=time() - first_start_time)))
+    print("\nBatches completed in", str(timedelta(seconds=time() - batch_start_time)))
 
     results_full = {
         "blazeface": [],
@@ -104,7 +105,7 @@ def hue_rotation(image, kwargs):
     return Image.fromarray(img, "HSV").convert("RGB")
 
 for i in range(0, 255):
-    print("\n(" + str(int(i / 4)) + "/255) ", end="")
+    print("\n(" + str(i) + "/255) ", end="")
     write_results(paths, classify(transform=hue_rotation, shift=i), path="results/" + str(i) + ".csv", known=True)
 
-print("\n\nCompleted in", str(timedelta(seconds=time() - st)))
+print("\n\nCompleted in", str(timedelta(seconds=time() - initial_start_time)))
