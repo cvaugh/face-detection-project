@@ -9,6 +9,14 @@ from torch import from_numpy
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 
+__cached_instance = None
+
+def __get_cached_instance():
+    global __cached_instance
+    if __cached_instance is None:
+        __cached_instance = create_instance()
+    return __cached_instance
+
 class BFDataset(Dataset):
     def __init__(self, images):
         self.images = [image.resize((128, 128)) for image in images]
@@ -29,8 +37,9 @@ def create_instance(weights=path.join(blazeface_path, "blazeface.pth"), anchors=
     return instance
 
 
-def classify(instance, images, batch_size=512, num_workers=0):
+def classify(images, instance=None, batch_size=512, num_workers=0):
     if not isinstance(images, list): images = [images]
+    if instance is None: instance = __get_cached_instance()
     dl = DataLoader(BFDataset(images), num_workers=num_workers, pin_memory=True, shuffle=False, batch_size=min(len(images), batch_size))
     results = []
     # to do: optimize this loop

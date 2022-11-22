@@ -24,11 +24,6 @@ batches = [paths[i:i + batch_size] for i in range(0, len(paths), batch_size)]
 batch_count = len(batches)
 print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count == 1 else "batches", "of size", str(batch_size) + ")")
 
-ssd_instance = ssd.create_instance()
-mtcnn_instance = mtcnn.create_instance()
-blazeface_instance = blazeface.create_instance()
-retinaface_instance = retinaface.create_instance()
-
 results = [None] * batch_count
 
 def classify(transform=None, **kwargs):
@@ -46,10 +41,10 @@ def classify(transform=None, **kwargs):
             progress.set_description("Transforming images")
             images = [transform(image, kwargs) for image in progress]
 
-        results_blazeface = blazeface.classify(blazeface_instance, images)
-        results_mtcnn = mtcnn.classify(mtcnn_instance, images)
-        results_ssd = ssd.classify(ssd_instance, images)
-        #results_retinaface = retinaface.classify(retinaface_instance, images)
+        results_blazeface = blazeface.classify(images)
+        results_mtcnn = mtcnn.classify(images)
+        results_ssd = ssd.classify(images)
+        #results_retinaface = retinaface.classify(images)
         results_retinaface = [False] * len(images)
 
         results[i] = {
