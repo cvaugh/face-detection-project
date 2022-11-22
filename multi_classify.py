@@ -1,5 +1,6 @@
 import fd_wrapper as wrapper
-from fd_wrapper import *
+from fd_wrapper import transform
+from fd_wrapper.detectors import *
 from time import time
 from datetime import timedelta
 import numpy as np
