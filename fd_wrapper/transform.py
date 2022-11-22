@@ -16,17 +16,16 @@ def _low_high_pass(im, radius, low=1):
         # fft of image
         fft1 = fftpack.fftshift(fftpack.fft2(im_np))
         # Create a low pass filter image
-        x,y = im_np.shape[0],im_np.shape[1]
+        x, y = im_np.shape[0], im_np.shape[1]
         # size of circle
-        e_x,e_y = radius, radius
+        e_x, e_y = radius, radius
         # create a box 
-        bbox=((x/2)-(e_x/2),(y/2)-(e_y/2),(x/2)+(e_x/2),(y/2)+(e_y/2))
+        bbox = ((x / 2) - (e_x / 2), (y / 2) - (e_y / 2), (x / 2) + (e_x / 2), (y / 2) + (e_y / 2))
         
-        low_pass = Image.new("L",(im_np.shape[0],im_np.shape[1]),color=low)
+        low_pass = Image.new("L", (im_np.shape[0], im_np.shape[1]), color=low)
 
         draw1=ImageDraw.Draw(low_pass)
         draw1.ellipse(bbox, fill= 1 - low)
-
 
         low_pass_np = np.transpose(np.array(low_pass), (1, 0))
         
