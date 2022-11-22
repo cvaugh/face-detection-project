@@ -4,7 +4,6 @@ from fd_wrapper.detectors import *
 from time import time
 from datetime import timedelta
 import numpy as np
-from PIL import Image
 from pathlib import Path
 from os.path import dirname
 from tqdm import tqdm

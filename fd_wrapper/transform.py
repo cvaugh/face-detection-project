@@ -24,7 +24,7 @@ def _low_high_pass(im, radius, low=1):
         
         low_pass = Image.new("L", (im_np.shape[0], im_np.shape[1]), color=low)
 
-        draw1=ImageDraw.Draw(low_pass)
+        draw1 = ImageDraw.Draw(low_pass)
         draw1.ellipse(bbox, fill= 1 - low)
 
         low_pass_np = np.transpose(np.array(low_pass), (1, 0))

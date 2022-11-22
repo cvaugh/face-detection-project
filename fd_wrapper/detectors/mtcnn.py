@@ -1,6 +1,4 @@
 from facenet_pytorch import MTCNN
-import numpy as np
-from PIL import Image
 from tqdm import tqdm
 
 __cached_instance = None
