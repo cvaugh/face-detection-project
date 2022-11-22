@@ -43,13 +43,13 @@ def _low_high_pass(im, radius, low=1):
         c.append(ifft2_low)
 
     final = np.transpose(np.array(c), (1, 2, 0))
-    return final
+    return Image.fromarray(np.uint8(final * 255))
 
 def low_pass(image, radius):
-    return _low_high_pass(image, radius, 1)
+    return _low_high_pass(np.array(image), radius, 1)
 
 def high_pass(image, radius):
-    return _low_high_pass(image, radius, 0)
+    return _low_high_pass(np.array(image), radius, 0)
 
 def hue_rotation(image, rot):
     img = np.array(image.convert(mode="HSV"))
