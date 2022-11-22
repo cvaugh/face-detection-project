@@ -39,7 +39,7 @@ def classify(transform=None, **kwargs):
         if transform is not None:
             progress = tqdm(images)
             progress.set_description("Transforming images")
-            images = [transform(image, kwargs) for image in progress]
+            images = [transform(image, int(kwargs.get("rot"))) for image in progress]
 
         results_blazeface = blazeface.classify(images)
         results_mtcnn = mtcnn.classify(images)
@@ -97,31 +97,13 @@ def write_results(paths, results, path="results.csv", known=False):
                 lines += paths[i] + ", " + blazeface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + "\n"
         f.writelines(lines)
 
-def hue_rotation(image, kwargs):
-    img = np.array(image.convert(mode="HSV"))
-    img[..., 0] = int(kwargs.get("rot")) % 256
-    img[..., 1] = 96
-    return Image.fromarray(img, "HSV").convert("RGB")
-
-def saturation_rotation(image, kwargs):
-    img = np.array(image.convert(mode="HSV"))
-    rot = int(kwargs.get("rot"))
-    if rot < 255:
-        img[..., 1] = rot
-    return Image.fromarray(img, "HSV").convert("RGB")
-
-def value_rotation(image, kwargs):
-    img = np.array(image.convert(mode="HSV"))
-    img[..., 2] = img[..., 2] * (int(kwargs.get("rot")) / 255)
-    return Image.fromarray(img, "HSV").convert("RGB")
-
 sets_start_time = time()
 set_count = 256
 set_durations = []
 for i in range(set_count):
     set_start_time = time()
     print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
-    write_results(paths, classify(transform=value_rotation, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
+    write_results(paths, classify(transform=transform.value_rotation, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
     set_duration = time() - set_start_time
     set_durations.append(set_duration)
     print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +

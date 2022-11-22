@@ -3,7 +3,7 @@ from PIL import Image
 from tqdm import tqdm
 from fnmatch import filter
 
-__all__ = ["blazeface", "mtcnn", "retinaface", "ssd"]
+__all__ = ["transform", "blazeface", "mtcnn", "retinaface", "ssd"]
 
 # OS-independent way to get a path relative to the current file
 def relative_path(path, root=__file__):
