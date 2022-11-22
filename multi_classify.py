@@ -83,7 +83,7 @@ def write_results(paths, results, path="results.csv", known=False):
     Path(dirname(path)).mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         if known:
-            lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD, Actual\n"
+            lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD, Ground Truth\n"
         else:
             lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD\n"
         for i in range(len(paths)):
@@ -99,16 +99,16 @@ def write_results(paths, results, path="results.csv", known=False):
         f.writelines(lines)
 
 sets_start_time = time()
-set_count = 256
+set_count = 64
 set_durations = []
 for i in range(set_count):
     set_start_time = time()
     print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
-    write_results(paths, classify(transform=transform.value_rotation, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
+    write_results(paths, classify(transform=transform.low_high_pass_mean, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
     set_duration = time() - set_start_time
     set_durations.append(set_duration)
     print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
-        str(timedelta(seconds=np.mean(set_durations) * (set_count - i - 1))), "remaining)")
+        str(timedelta(seconds=np.mean(set_durations[-5:]) * (set_count - i - 1))), "remaining)")
 
 #write_results(paths, classify(), path="results.csv", known=True)
 
