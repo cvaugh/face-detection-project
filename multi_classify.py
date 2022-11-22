@@ -29,8 +29,6 @@ mtcnn_instance = mtcnn.create_instance()
 blazeface_instance = blazeface.create_instance()
 retinaface_instance = retinaface.create_instance()
 
-initial_start_time = time()
-
 results = [None] * batch_count
 
 def classify(transform=None, **kwargs):
@@ -110,10 +108,30 @@ def hue_rotation(image, kwargs):
     img[..., 1] = 96
     return Image.fromarray(img, "HSV").convert("RGB")
 
-for i in range(0, 256):
-    print("\n(" + str(i) + "/256) ", end="")
-    write_results(paths, classify(transform=hue_rotation, rot=i), path="results/" + str(i) + ".csv", known=True)
+def saturation_rotation(image, kwargs):
+    img = np.array(image.convert(mode="HSV"))
+    rot = int(kwargs.get("rot"))
+    if rot < 255:
+        img[..., 1] = rot
+    return Image.fromarray(img, "HSV").convert("RGB")
+
+def value_rotation(image, kwargs):
+    img = np.array(image.convert(mode="HSV"))
+    img[..., 2] = img[..., 2] * (int(kwargs.get("rot")) / 255)
+    return Image.fromarray(img, "HSV").convert("RGB")
+
+sets_start_time = time()
+set_count = 256
+set_durations = []
+for i in range(set_count):
+    set_start_time = time()
+    print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
+    write_results(paths, classify(transform=value_rotation, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
+    set_duration = time() - set_start_time
+    set_durations.append(set_duration)
+    print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
+        str(timedelta(seconds=np.mean(set_durations) * (set_count - i - 1))), "remaining)")
 
 #write_results(paths, classify(), path="results.csv", known=True)
 
-print("\n\nCompleted in", str(timedelta(seconds=time() - initial_start_time)))
+print("\n\nCompleted in", str(timedelta(seconds=time() - sets_start_time)))
