@@ -7,7 +7,7 @@ from csv import reader
 import matplotlib.pyplot as plt
 from colorsys import hsv_to_rgb
 
-results_dir = wrapper.relative_path("./results/200/value", root=__file__)
+results_dir = wrapper.relative_path("./results/200/low_high_pass_mean", root=__file__)
 
 paths = []
 for root, dirs, files in os.walk(results_dir):
@@ -39,17 +39,19 @@ results = [None] * len(detectors)
 image_count = len(entries[0]["results"])
 
 fig, ax = plt.subplots(len(detectors), sharex=True)
-fig.suptitle("Accuracy when classifying " + str(image_count) + " known images (control)")
+fig.suptitle("Accuracy when classifying " + str(image_count) + " known images\n(mean of low and high pass)")
 fig.tight_layout()
 
-graphing = "value"
-graph_xlabel = "Value (HSV, 0-255)"
+graphing = None
+graph_xlabel = "Radius"
+
+line_color = "blue" if graphing is None else "gray"
 
 for i in range(len(detectors)):
     results[i] = np.array([100 * np.sum(entry["results"][:, i + 1].astype(int) == entry["results"][:, 5].astype(int)) / image_count for entry in entries])
     ax[i].set_title(detectors[i])
     ax[i].set_ylabel("Accuracy (percent)")
-    ax[i].plot(shifts, results[i], color="gray", linewidth=1)
+    ax[i].plot(shifts, results[i], color=line_color, linewidth=1)
     if graphing is not None:
         for j in range(0, np.max(shifts) + 1):
             match graphing:
