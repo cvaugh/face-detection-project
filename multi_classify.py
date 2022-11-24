@@ -17,10 +17,10 @@ dataset_path = wrapper.relative_path("./known/200", root=__file__)
 
 paths = wrapper.read_dataset(dataset_path)
 
-batch_size = len(paths)
+batch_size = 200
 
 # Small subset of images for testing
-batches = [paths[i:i + batch_size] for i in range(0, len(paths), batch_size)]
+batches = wrapper.create_batches(paths, batch_size)
 batch_count = len(batches)
 print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count == 1 else "batches", "of size", str(batch_size) + ")")
 

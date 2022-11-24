@@ -2,6 +2,8 @@ import os
 from PIL import Image
 from tqdm import tqdm
 from fnmatch import filter
+import numpy as np
+from csv import reader
 
 __all__ = ["transform"]
 
@@ -20,15 +22,59 @@ def read_dataset(root_dir, filename_pattern="*.jpg"):
             paths.append(os.path.join(root, path))
     return paths
 
-def load_image(path, image_size=None):
+def load_image(path, image_size=None, as_ndarray=False):
     img = Image.open(path).convert("RGB")
-    return img if image_size is None else img.resize(image_size)
+    img if image_size is None else img.resize(image_size)
+    return np.asarray(img) if as_ndarray else img
 
-def load_images(paths, image_size=None, silent=False):
-    if silent:
-        if not isinstance(paths, list): paths = [paths]
-        return [load_image(path, image_size) for path in paths]
-    else:
-        progress = tqdm(load_images(paths, image_size, silent=True), total=len(paths))
+def load_images(paths, image_size=None, silent=False, as_ndarray=False):
+    if not isinstance(paths, list): paths = [paths]
+    if not silent:
+        progress = tqdm(paths)
         progress.set_description("Loading images")
-        return [image for image in progress]
+    iter = paths if silent else progress
+    return [load_image(path, image_size, as_ndarray) for path in iter]
+
+def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_to=None):
+    with open(path) as file:
+        r = reader(file, delimiter="\t")
+        faces = []
+        not_faces = []
+        unsure = []
+        unclassified = []
+        for row in r:
+            if split_path_at is not None:
+                if relative_to is None:
+                    row[0] = row[0][row[0].index(split_path_at) + len(split_path_at) + len(path_separator):]
+                else:
+                    row[0] = os.path.join(relative_to,
+                             row[0][row[0].index(split_path_at) + len(split_path_at) + len(path_separator):])
+            match row[1]:
+                case "FACE":
+                    faces.append(row[0])
+                case "NOT_FACE":
+                    not_faces.append(row[0])
+                case "UNSURE":
+                    unsure.append(row[0])
+                case _:
+                    unclassified.append(row[0])
+        return faces, not_faces, unsure, unclassified
+
+def create_batches(paths, batch_size=4096):
+    batches = []
+    index = 0
+    for i in range(0, len(paths), batch_size):
+        batches.append((index, paths[i:i + batch_size]))
+        index += 1
+    return batches
+
+def average_image(images, silent=False):
+    y, x, z = np.shape(images[0])
+    avg = np.zeros((y, x, z), dtype=float)
+    if not silent:
+        progress = tqdm(images)
+        progress.set_description("Averaging images")
+    for image in images if silent else progress:
+        avg = avg + (image / len(images))
+    avg = np.array(np.round(avg), dtype=np.uint8)
+    return avg

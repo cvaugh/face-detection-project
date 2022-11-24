@@ -52,7 +52,7 @@ def high_pass(image, radius):
 
 def low_high_pass_mean(image, radius):
     arr = np.array(image)
-    return Image.fromarray(np.uint8(((_low_high_pass(np.array(image), radius, 0) + _low_high_pass(np.array(image), radius, 0)) / 2) * 255))
+    return Image.fromarray(np.uint8(((_low_high_pass(arr, radius, 0) + _low_high_pass(arr, radius, 0)) / 2) * 255))
 
 def hue_rotation(image, rot):
     img = np.array(image.convert(mode="HSV"))
