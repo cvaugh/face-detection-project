@@ -1,4 +1,5 @@
 from facenet_pytorch import MTCNN
+import torch.cuda
 from tqdm import tqdm
 
 __cached_instance = None
@@ -10,7 +11,7 @@ def __get_cached_instance():
     return __cached_instance
 
 def create_instance(select_largest=False):
-    return MTCNN(select_largest=select_largest)
+    return MTCNN(select_largest=select_largest, device="cuda:0" if torch.cuda.is_available() else "cpu")
 
 def classify(images, instance=None, resize=(512, 512)):
     if not isinstance(images, list): images = [images]

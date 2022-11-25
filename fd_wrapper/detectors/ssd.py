@@ -1,4 +1,3 @@
-import fd_wrapper
 from deepface.detectors.SsdWrapper import build_model
 from numpy import array
 import cv2

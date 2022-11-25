@@ -19,7 +19,7 @@ if __name__ != "__main__":
 paths = wrapper.get_ground_truth(wrapper.relative_path("./filtered/classified_00-03.tsv", root=__file__),
     split_path_at="flickr_1.2", relative_to=wrapper.relative_path("./filtered/flickr_1.2", root=__file__))[0]
 
-batch_size = 256
+batch_size = 128
 
 # Small subset of images for testing
 batches = wrapper.create_batches(paths, batch_size)
@@ -32,7 +32,6 @@ def classify(transform=None, **kwargs):
     batch_start_time = time()
     durations = []
 
-    # to do: multithreading
     for i, batch in batches:
         print("Batch", (i + 1), "of", batch_count)
         start_time = time()
@@ -46,8 +45,7 @@ def classify(transform=None, **kwargs):
         results_blazeface = blazeface.classify(images)
         results_mtcnn = mtcnn.classify(images)
         results_ssd = ssd.classify(images)
-        #results_retinaface = retinaface.classify(images)
-        results_retinaface = [False] * len(images)
+        results_retinaface = retinaface.classify(images)
 
         results[i] = {
             "blazeface": results_blazeface,

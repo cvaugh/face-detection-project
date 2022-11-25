@@ -12,3 +12,5 @@ result*.csv
 experiments/
 result*/
 pillow_testing.py
+average_test.py
+average_test2.py
