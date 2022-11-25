@@ -12,12 +12,14 @@ if __name__ != "__main__":
     exit()
 
 #dataset_path = wrapper.relative_path("./filtered/flickr_1.2", root=__file__)
-dataset_path = wrapper.relative_path("./known/200", root=__file__)
+#dataset_path = wrapper.relative_path("./known/200", root=__file__)
 #dataset_path = wrapper.relative_path("./experiments/b", root=__file__)
 
-paths = wrapper.read_dataset(dataset_path)
+#paths = wrapper.read_dataset(dataset_path)
+paths = wrapper.get_ground_truth(wrapper.relative_path("./filtered/classified_00-03.tsv", root=__file__),
+    split_path_at="flickr_1.2", relative_to=wrapper.relative_path("./filtered/flickr_1.2", root=__file__))[0]
 
-batch_size = 200
+batch_size = 256
 
 # Small subset of images for testing
 batches = wrapper.create_batches(paths, batch_size)
@@ -31,10 +33,10 @@ def classify(transform=None, **kwargs):
     durations = []
 
     # to do: multithreading
-    for i in range(batch_count):
+    for i, batch in batches:
         print("Batch", (i + 1), "of", batch_count)
         start_time = time()
-        images = wrapper.load_images(batches[i])
+        images = wrapper.load_images(batch)
 
         if transform is not None:
             progress = tqdm(images)
@@ -56,7 +58,7 @@ def classify(transform=None, **kwargs):
         end_time = time()
         duration = end_time - start_time
         durations.append(duration)
-        avg = np.mean(durations)
+        avg = np.mean(durations[-5:])
         print("Completed in", str(timedelta(seconds=duration)),
             "(total:", str(timedelta(seconds=end_time - batch_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
             "remaining: ~" + str(timedelta(seconds=avg * (batch_count - i - 1))) + ")")
@@ -97,18 +99,19 @@ def write_results(paths, results, path="results.csv", known=False):
                 lines += paths[i] + ", " + blazeface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + "\n"
         f.writelines(lines)
 
-sets_start_time = time()
-set_count = 64
-set_durations = []
-for i in range(set_count):
-    set_start_time = time()
-    print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
-    write_results(paths, classify(transform=transform.low_high_pass_mean, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
-    set_duration = time() - set_start_time
-    set_durations.append(set_duration)
-    print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
-        str(timedelta(seconds=np.mean(set_durations[-5:]) * (set_count - i - 1))), "remaining)")
+def run_batches():
+    sets_start_time = time()
+    set_count = 64
+    set_durations = []
+    for i in range(set_count):
+        set_start_time = time()
+        print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
+        write_results(paths, classify(transform=transform.low_high_pass_mean, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
+        set_duration = time() - set_start_time
+        set_durations.append(set_duration)
+        print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
+            str(timedelta(seconds=np.mean(set_durations[-5:]) * (set_count - i - 1))), "remaining)")
+    print("\n\nCompleted in", str(timedelta(seconds=time() - sets_start_time)))
 
-#write_results(paths, classify(), path="results.csv", known=True)
-
-print("\n\nCompleted in", str(timedelta(seconds=time() - sets_start_time)))
+#run_batches()
+write_results(paths, classify(), path="results.csv", known=True)
