@@ -2,10 +2,10 @@
 
 ## Face detectors used
 
-- [BlazeFace](https://arxiv.org/pdf/1907.05047.pdf)
-- [MTCNN](https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)
-- [RetinaFace](https://arxiv.org/pdf/1905.00641.pdf)
-- [SSD](https://arxiv.org/pdf/1512.02325.pdf)
+- [BlazeFace](https://arxiv.org/abs/1907.05047)
+- [MTCNN](https://arxiv.org/abs/1604.02878)
+- [RetinaFace](https://arxiv.org/abs/1905.00641)
+- [SSD](https://arxiv.org/abs/1512.02325)
 
 ## Attribution
 
