@@ -1,5 +1,5 @@
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 from scipy import fftpack
 
 def _low_high_pass(im, radius, low=1):
@@ -70,3 +70,6 @@ def value_rotation(image, rot):
     img = np.array(image.convert(mode="HSV"))
     img[..., 2] = img[..., 2] * (rot / 255)
     return Image.fromarray(img, "HSV").convert("RGB")
+
+def gaussian_blur(image, radius):
+    return image.filter(ImageFilter.GaussianBlur(radius))
