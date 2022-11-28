@@ -60,11 +60,11 @@ def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_t
                     unclassified.append(row[0])
         return faces, not_faces, unsure, unclassified
 
-def create_batches(paths, batch_size=4096):
+def create_batches(items, batch_size=128):
     batches = []
     index = 0
-    for i in range(0, len(paths), batch_size):
-        batches.append((index, paths[i:i + batch_size]))
+    for i in range(0, len(items), batch_size):
+        batches.append((index, items[i:i + batch_size]))
         index += 1
     return batches
 
