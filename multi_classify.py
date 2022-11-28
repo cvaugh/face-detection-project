@@ -12,12 +12,21 @@ if __name__ != "__main__":
     exit()
 
 #dataset_path = wrapper.relative_path("./filtered/flickr_1.2", root=__file__)
-#dataset_path = wrapper.relative_path("./known/200", root=__file__)
+dataset_path = wrapper.relative_path("./known/200", root=__file__)
 #dataset_path = wrapper.relative_path("./experiments/b", root=__file__)
+#dataset_path = wrapper.relative_path("../datasets/celeba/img_align_celeba", root=__file__)
 
-#paths = wrapper.read_dataset(dataset_path)
-paths = wrapper.get_ground_truth(wrapper.relative_path("./filtered/classified_00-03.tsv", root=__file__),
-    split_path_at="flickr_1.2", relative_to=wrapper.relative_path("./filtered/flickr_1.2", root=__file__))[0]
+paths = wrapper.read_dataset(dataset_path)
+#paths = wrapper.get_ground_truth(wrapper.relative_path("./filtered/classified_00-03.tsv", root=__file__),
+#    split_path_at="flickr_1.2", relative_to=wrapper.relative_path("./filtered/flickr_1.2", root=__file__))[0]
+
+paths_start = 0
+paths_end = min(-1, len(paths))
+if paths_end < 0: paths_end = len(paths)
+assert paths_start < paths_end, "paths_start must be < paths_end"
+
+print("Truncating paths from", len(paths), "to", paths_end - paths_start, "images (paths", paths_start, "to", str(paths_end) + ")")
+paths = paths[paths_start:paths_end]
 
 batch_size = 128
 
@@ -28,24 +37,24 @@ print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count
 
 results = [None] * batch_count
 
-def classify(transform=None, **kwargs):
+def classify(transform=None, set_index=0):
     batch_start_time = time()
     durations = []
 
     for i, batch in batches:
-        print("Batch", (i + 1), "of", batch_count)
+        print("Batch", i + 1, "of", batch_count)
         start_time = time()
         images = wrapper.load_images(batch)
 
         if transform is not None:
             progress = tqdm(images)
             progress.set_description("Transforming images")
-            images = [transform(image, int(kwargs.get("rot"))) for image in progress]
+            images = [transform(image, set_index) for image in progress]
 
         results_blazeface = blazeface.classify(images)
-        results_mtcnn = mtcnn.classify(images)
         results_ssd = ssd.classify(images)
         results_retinaface = retinaface.classify(images)
+        results_mtcnn = mtcnn.classify(images)
 
         results[i] = {
             "blazeface": results_blazeface,
@@ -99,12 +108,12 @@ def write_results(paths, results, path="results.csv", known=False):
 
 def run_batches():
     sets_start_time = time()
-    set_count = 64
+    set_count = 100
     set_durations = []
     for i in range(set_count):
         set_start_time = time()
         print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
-        write_results(paths, classify(transform=transform.low_high_pass_mean, rot=i), path="results_temp/" + str(i) + ".csv", known=True)
+        write_results(paths, classify(transform=transform.gaussian_blur, set_index=i), path="results_temp/" + str(i) + ".csv", known=True)
         set_duration = time() - set_start_time
         set_durations.append(set_duration)
         print(set_count - i + 1, "sets remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
@@ -112,4 +121,4 @@ def run_batches():
     print("\n\nCompleted in", str(timedelta(seconds=time() - sets_start_time)))
 
 #run_batches()
-write_results(paths, classify(), path="results.csv", known=True)
+write_results(paths, classify(), path=f"results_{paths_start}-{paths_end}.csv", known=True)
