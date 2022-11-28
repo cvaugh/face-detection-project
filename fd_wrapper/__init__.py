@@ -40,7 +40,7 @@ def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_t
         r = reader(file, delimiter="\t")
         faces = []
         not_faces = []
-        unsure = []
+        ambiguous = []
         unclassified = []
         for row in r:
             if split_path_at is not None:
@@ -54,11 +54,11 @@ def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_t
                     faces.append(row[0])
                 case "NOT_FACE":
                     not_faces.append(row[0])
-                case "UNSURE":
-                    unsure.append(row[0])
+                case "AMBIGUOUS":
+                    ambiguous.append(row[0])
                 case _:
                     unclassified.append(row[0])
-        return faces, not_faces, unsure, unclassified
+        return faces, not_faces, ambiguous, unclassified
 
 def create_batches(items, batch_size=128):
     batches = []
