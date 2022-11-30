@@ -7,7 +7,7 @@ from csv import reader
 import matplotlib.pyplot as plt
 from colorsys import hsv_to_rgb
 
-results_dir = wrapper.relative_path("./results/200/low_high_pass_mean", root=__file__)
+results_dir = wrapper.relative_path("./results/200_old/hue", root=__file__)
 
 paths = []
 for root, dirs, files in os.walk(results_dir):
@@ -38,17 +38,22 @@ results = [None] * len(detectors)
 
 image_count = len(entries[0]["results"])
 
-fig, ax = plt.subplots(len(detectors), sharex=True)
-fig.suptitle("Accuracy when classifying " + str(image_count) + " known images\n(mean of low and high pass)")
+fig, ax = plt.subplots(len(detectors) + 1, sharex=True)
+fig.suptitle("Accuracy when classifying " + str(image_count) + " known images")
 fig.tight_layout()
 
-graphing = None
-graph_xlabel = "Radius"
+graphing = "hue"
+graph_xlabel = "Hue (0-255)"
 
 line_color = "blue" if graphing is None else "gray"
 
 for i in range(len(detectors)):
     results[i] = np.array([100 * np.sum(entry["results"][:, i + 1].astype(int) == entry["results"][:, 5].astype(int)) / image_count for entry in entries])
+
+y_min = np.min(results)
+
+for i in range(len(detectors)):
+    ax[i].set_ylim(y_min, 100)
     ax[i].set_title(detectors[i])
     ax[i].set_ylabel("Accuracy (percent)")
     ax[i].plot(shifts, results[i], color=line_color, linewidth=1)
@@ -64,5 +69,11 @@ for i in range(len(detectors)):
                 case _:
                     color = "red"
             ax[i].plot(j, results[i][j], color=color, marker="o", markersize=3)
-ax[len(detectors) - 1].set_xlabel(graph_xlabel)
+    ax[len(detectors)].plot(shifts, results[i], linewidth=1)
+    
+ax[len(detectors)].set_ylim(y_min, 100)
+ax[len(detectors)].set_title("All detectors")
+ax[len(detectors)].set_ylabel("Accuracy (percent)")
+ax[len(detectors)].set_xlabel(graph_xlabel)
+ax[len(detectors)].legend(detectors, loc="upper right", prop={"size": 8})
 plt.show()
