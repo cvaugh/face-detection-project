@@ -1,0 +1,20 @@
+deepface==0.0.75
+facenet-pytorch==2.5.2
+matplotlib==3.6.2
+numpy==1.23.4
+opencv-python==4.6.0.66
+Pillow==9.3.0
+retina-face==0.0.12
+scipy==1.9.3
+tensorflow==2.10.0
+tensorflow-gpu==2.10.1
+tqdm==4.64.1
+# Uncomment the following four lines if you are using CUDA 11.7 on Windows
+#--extra-index-url https://download.pytorch.org/whl/cu117
+#torch==1.13.0+cu117
+#torchaudio==0.13.0+cu117
+#torchvision==0.14.0+cu117
+# Comment out the following three lines (torch, torchvision, torchaudio) if you are using CUDA on Windows
+torch==1.13.0
+torchvision==0.13.0
+torchaudio==0.14.0
