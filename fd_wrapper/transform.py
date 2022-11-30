@@ -60,9 +60,9 @@ def hue_rotation(image, rot):
     img[..., 1] = 96
     return Image.fromarray(img, "HSV").convert("RGB")
 
-def saturation_rotation(image, rot):
+def saturation_rotation(image, rot, separate_final=True):
     img = np.array(image.convert(mode="HSV"))
-    if rot < 255:
+    if not separate_final or rot < 255:
         img[..., 1] = rot
     return Image.fromarray(img, "HSV").convert("RGB")
 

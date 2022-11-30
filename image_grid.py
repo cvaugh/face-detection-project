@@ -5,7 +5,7 @@ from csv import reader
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from tqdm import tqdm
 
-results_csv = wrapper.relative_path("./results/celeba/results_with_paths.csv", root=__file__)
+results_csv = wrapper.relative_path("./results/results_negative.csv", root=__file__)
 
 results = []
 with open(results_csv) as f:
@@ -33,7 +33,7 @@ for i in tqdm(range(len(counts))):
     xx, yy = np.meshgrid(np.linspace(0, 1, l), np.linspace(0, 1, l))
     points = np.vstack([xx.ravel(), yy.ravel()])
     for x, y, path in zip(points[0], points[1], counts[i]):
-        ab = AnnotationBbox(OffsetImage(plt.imread(wrapper.relative_path(path, root=__file__)), zoom=0.05), (x, y), frameon=False)
+        ab = AnnotationBbox(OffsetImage(plt.imread(path), zoom=0.05), (x, y), frameon=False)
         ax[i].add_artist(ab)
     ax[i].set_yticklabels([])
     ax[i].set_xticklabels([])

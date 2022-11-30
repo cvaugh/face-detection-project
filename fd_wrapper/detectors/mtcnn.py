@@ -1,5 +1,4 @@
 from facenet_pytorch import MTCNN
-import torch.cuda
 from tqdm import tqdm
 
 __cached_instance = None

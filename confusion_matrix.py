@@ -5,8 +5,8 @@ import matplotlib.patheffects
 from matplotlib.colors import ListedColormap
 import csv
 
-positive_file = wrapper.relative_path("./results_positive.csv", root=__file__)
-negative_file = wrapper.relative_path("./results_negative.csv", root=__file__)
+positive_file = wrapper.relative_path("./results/known_positive.csv", root=__file__)
+negative_file = wrapper.relative_path("./results/known_negative.csv", root=__file__)
 
 detectors = ["BlazeFace", "MTCNN", "RetinaFace", "SSD"]
 
