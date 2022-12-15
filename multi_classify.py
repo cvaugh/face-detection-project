@@ -24,14 +24,14 @@ paths = wrapper.read_dataset(dataset_path)
 #    split_path_at="flickr_1.2", relative_to=wrapper.relative_path("./filtered/flickr_1.2", root=__file__))[0][:5000]
 
 truth_override = None
-detectors = [blazeface, insightface, mtcnn, retinaface, ssd]
+detectors = [blazeface, insightface, mtcnn, ssd]
 
 paths_start = 0
 paths_end = min(-1, len(paths))
 if paths_end < 0: paths_end = len(paths)
 assert paths_start < paths_end, "paths_start must be < paths_end"
 
-print("Truncating paths from", len(paths), "to", paths_end - paths_start, "images (paths", paths_start, "to", str(paths_end) + ")")
+print(f"Truncating paths from {len(paths)} to {paths_end - paths_start} images (paths {paths_start} to {paths_end})")
 paths = paths[paths_start:paths_end]
 
 batch_size = 100
@@ -39,21 +39,21 @@ batch_size = 100
 # Small subset of images for testing
 batches = wrapper.create_batches(paths, batch_size)
 batch_count = len(batches)
-print("Found", len(paths), "images (" + str(batch_count), "batch" if batch_count == 1 else "batches", "of size", str(batch_size) + ")")
+print(f"Found {len(paths)} images ({batch_count} {'batch' if batch_count == 1 else 'batches'} of size {batch_size})")
 
-def run_batches():
-    sets_start_time = time()
-    set_count = 255
-    set_durations = []
-    for i in range(set_count):
-        set_start_time = time()
-        print("\n(Set " + str(i) + "/" + str(set_count) + ") ", end="")
-        wrapper.write_results(paths, wrapper.classify_batches(batches, detectors, transform=transform.hue_rotation, transform_offset=i), detectors, f"results_temp/{str(i)}.csv", known=True, truth_override=truth_override)
-        set_duration = time() - set_start_time
-        set_durations.append(set_duration)
-        print(set_count - i - 1, "set(s) remaining (" + str(timedelta(seconds=np.sum(set_durations))), "elapsed, ~" +
-            str(timedelta(seconds=np.mean(set_durations[-5:]) * (set_count - i - 1))), "remaining)")
-    print("\n\nCompleted in", str(timedelta(seconds=time() - sets_start_time)))
+def run_batches(start_index=0, set_count=255):
+    start_time = time()
+    durations = []
+    for i in range(max(0, start_index), set_count):
+        start_time = time()
+        print(f"\n(Set {i}/{set_count}) ", end="")
+        wrapper.write_results(paths, wrapper.classify_batches(batches, detectors, transform.hue_rotation, i),
+                              detectors, f"results_temp/{str(i)}.csv", True, truth_override)
+        duration = time() - start_time
+        durations.append(duration)
+        remaining = set_count - i - 1
+        print(f"{remaining} set(s) remaining ({timedelta(seconds=np.sum(durations))}",
+              f" elapsed, ~{timedelta(seconds=np.mean(durations[-5:]) * remaining)} remaining)")
+    print(f"\n\nCompleted in {timedelta(seconds=time() - start_time)}")
 
 run_batches()
-#write_results(paths, classify(), f"results_{paths_start}-{paths_end}.csv", known=True)

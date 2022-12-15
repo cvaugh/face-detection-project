@@ -59,7 +59,7 @@ results = [None] * len(detectors)
 image_count = len(entries[0]["results"])
 
 fig, ax = plt.subplots(len(detectors) + 1, sharex=True)
-fig.suptitle("Accuracy when classifying " + str(image_count) + " known" + ("-positive" if positive_only else "-negative" if negative_only else "") + " images")
+fig.suptitle(f"Accuracy when classifying {image_count} known{'-positive' if positive_only else '-negative' if negative_only else ''} images")
 fig.tight_layout()
 
 graph_xlabel = subtitle

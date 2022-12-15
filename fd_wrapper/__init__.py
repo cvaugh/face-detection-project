@@ -92,13 +92,14 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
     durations = []
 
     for i, batch in batches:
-        print("Batch", i + 1, "of", len(batches))
+        print(f"Batch {i + 1} of {len(batches)}")
         start_time = time()
         images = load_images(batch)
 
         if transform is not None:
             progress = tqdm(images)
             progress.set_description("Transforming images")
+            # to do: performance improvements, multithreading
             images = [transform(image, transform_offset) for image in progress]
 
         results[i] = { detector.name(): detector.classify(images) for detector in detectors }
@@ -107,11 +108,10 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
         duration = end_time - start_time
         durations.append(duration)
         avg = np.mean(durations[-5:])
-        print("Completed in", str(timedelta(seconds=duration)),
-            "(total:", str(timedelta(seconds=end_time - batch_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
-            "remaining: ~" + str(timedelta(seconds=avg * (len(batches) - i - 1))) + ")")
+        print(f"Completed in {timedelta(seconds=duration)} (total: {timedelta(seconds=end_time - batch_start_time)}," \
+              f" avg: {timedelta(seconds=avg)}, remaining: ~{timedelta(seconds=avg * (len(batches) - i - 1))})")
 
-    print("\nBatches completed in", str(timedelta(seconds=time() - batch_start_time)))
+    print(f"\nBatches completed in {timedelta(seconds=time() - batch_start_time)}")
 
     results_dict = { detector.name(): [] for detector in detectors }
 
