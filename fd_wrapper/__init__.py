@@ -3,7 +3,10 @@ from PIL import Image
 from tqdm import tqdm
 from fnmatch import filter
 import numpy as np
-from csv import reader
+import csv
+from time import time
+from datetime import timedelta
+from pathlib import Path
 
 __all__ = ["transform"]
 
@@ -37,7 +40,7 @@ def load_images(paths, image_size=None, silent=False, as_ndarray=False):
 
 def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_to=None):
     with open(path) as file:
-        r = reader(file, delimiter="\t")
+        r = csv.reader(file, delimiter="\t")
         faces = []
         not_faces = []
         ambiguous = []
@@ -78,3 +81,57 @@ def average_image(images, silent=False):
         avg = avg + (image / len(images))
     avg = np.array(np.round(avg), dtype=np.uint8)
     return avg
+
+def classify_transform():
+    raise NotImplementedError
+
+def classify_batches(batches, detectors, transform=None, transform_offset=0):
+    results = [None for batch in batches]
+    batch_start_time = time()
+    durations = []
+
+    for i, batch in batches:
+        print("Batch", i + 1, "of", len(batches))
+        start_time = time()
+        images = load_images(batch)
+
+        if transform is not None:
+            progress = tqdm(images)
+            progress.set_description("Transforming images")
+            images = [transform(image, transform_offset) for image in progress]
+
+        results[i] = { detector.name(): detector.classify(images) for detector in detectors }
+
+        end_time = time()
+        duration = end_time - start_time
+        durations.append(duration)
+        avg = np.mean(durations[-5:])
+        print("Completed in", str(timedelta(seconds=duration)),
+            "(total:", str(timedelta(seconds=end_time - batch_start_time)) + ", avg:", str(timedelta(seconds=avg)) + ",",
+            "remaining: ~" + str(timedelta(seconds=avg * (len(batches) - i - 1))) + ")")
+
+    print("\nBatches completed in", str(timedelta(seconds=time() - batch_start_time)))
+
+    results_dict = { detector.name(): [] for detector in detectors }
+
+    for entry in results:
+        for detector in detectors:
+            results_dict[detector.name()].extend(entry[detector.name()])
+    
+    return results_dict
+
+def write_results(paths, results, detectors, path, known=False, truth_override=None):
+    Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
+    header = [detector.name() for detector in detectors]
+    header.insert(0, "Path")
+    if known:
+        header.append("Ground Truth")
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter=",", lineterminator="\n", quoting=csv.QUOTE_NONNUMERIC)
+        writer.writerow(header)
+        for i in range(len(paths)):
+            row = [int(results[detector.name()][i]) for detector in detectors]
+            row.insert(0, paths[i])
+            if known:
+                row.append(int("positive" in paths[i]) if truth_override is None else truth_override)
+            writer.writerow(row)
