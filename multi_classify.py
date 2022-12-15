@@ -54,13 +54,15 @@ def classify(transform=None, set_index=0):
             images = [transform(image, set_index) for image in progress]
 
         results_blazeface = blazeface.classify(images)
-        results_ssd = ssd.classify(images)
+        results_insightface = insightface.classify(images)
+        results_mtcnn = mtcnn.classify(images)
         #results_retinaface = retinaface.classify(images)
         results_retinaface = [0] * len(images)
-        results_mtcnn = mtcnn.classify(images)
+        results_ssd = ssd.classify(images)
 
         results[i] = {
             "blazeface": results_blazeface,
+            "insightface": results_insightface,
             "mtcnn": results_mtcnn,
             "retinaface": results_retinaface,
             "ssd": results_ssd
@@ -77,6 +79,7 @@ def classify(transform=None, set_index=0):
 
     results_full = {
         "blazeface": [],
+        "insightface": [],
         "mtcnn": [],
         "retinaface": [],
         "ssd": []
@@ -84,6 +87,7 @@ def classify(transform=None, set_index=0):
 
     for entry in results:
         results_full["blazeface"].extend(entry["blazeface"])
+        results_full["insightface"].extend(entry["insightface"])
         results_full["mtcnn"].extend(entry["mtcnn"])
         results_full["retinaface"].extend(entry["retinaface"])
         results_full["ssd"].extend(entry["ssd"])
@@ -94,19 +98,20 @@ def write_results(paths, results, path="results.csv", known=False):
     Path(dirname(path)).mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         if known:
-            lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD, Ground Truth\n"
+            lines = "Path, BlazeFace, InsightFace, MTCNN, RetinaFace, SSD, Ground Truth\n"
         else:
-            lines = "Path, BlazeFace, MTCNN, RetinaFace, SSD\n"
+            lines = "Path, BlazeFace, InsightFace, MTCNN, RetinaFace, SSD\n"
         for i in range(len(paths)):
             blazeface_result = str(int(results["blazeface"][i]))
+            insightface_result = str(int(results["insightface"][i]))
             mtcnn_result = str(int(results["mtcnn"][i]))
             retinaface_result = str(int(results["retinaface"][i]))
             ssd_result = str(int(results["ssd"][i]))
             if known:
                 expected = str(int("positive" in paths[i]) if truth_override is None else truth_override)
-                lines += paths[i] + ", " + blazeface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + ", " + expected + "\n"
+                lines += paths[i] + ", " + blazeface_result + ", " + insightface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + ", " + expected + "\n"
             else:
-                lines += paths[i] + ", " + blazeface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + "\n"
+                lines += paths[i] + ", " + blazeface_result + ", " + insightface_result + ", " + mtcnn_result + ", " + retinaface_result + ", " + ssd_result + "\n"
         f.writelines(lines)
 
 def run_batches():

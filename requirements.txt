@@ -1,7 +1,9 @@
 deepface==0.0.75
 facenet-pytorch==2.5.2
+insightface==0.7.1
 matplotlib==3.6.2
 numpy==1.23.4
+onnxruntime-gpu==1.13.1
 opencv-python==4.6.0.66
 Pillow==9.3.0
 retina-face==0.0.12
