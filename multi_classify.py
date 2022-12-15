@@ -1,13 +1,15 @@
+import csv
+from datetime import timedelta
+from os.path import dirname
+from pathlib import Path
+from time import time
+
+import numpy as np
+from tqdm import tqdm
+
 import fd_wrapper as wrapper
 from fd_wrapper import transform
 from fd_wrapper.detectors import *
-from time import time
-from datetime import timedelta
-import numpy as np
-from pathlib import Path
-from os.path import dirname
-from tqdm import tqdm
-import csv
 
 if __name__ != "__main__":
     exit()

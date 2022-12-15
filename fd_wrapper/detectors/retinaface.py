@@ -1,7 +1,7 @@
+import cv2
+import numpy as np
 from retinaface import RetinaFace
 from tqdm import tqdm
-import numpy as np
-import cv2
 
 __cached_instance = None
 

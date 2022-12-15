@@ -1,9 +1,11 @@
+from math import floor
+
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
 import fd_wrapper as wrapper
 from fd_wrapper import transform
-import numpy as np
-import matplotlib.pyplot as plt
-from math import floor
-from tqdm import tqdm
 
 dataset_path = wrapper.relative_path("./known/200/positive", root=__file__)
 

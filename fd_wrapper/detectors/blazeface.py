@@ -1,12 +1,15 @@
-import fd_wrapper
-import numpy as np
 import sys
 from os import path
+
+import numpy as np
+
+import fd_wrapper
+
 blazeface_path = fd_wrapper.relative_path("./BlazeFace_PyTorch")
 sys.path.append(blazeface_path)
 from blazeface import BlazeFace
 from torch import from_numpy
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 __cached_instance = None

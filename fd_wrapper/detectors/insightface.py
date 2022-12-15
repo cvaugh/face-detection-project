@@ -1,9 +1,10 @@
-import fd_wrapper
 import cv2
-import numpy as np
 import insightface
+import numpy as np
 from insightface.app import FaceAnalysis
 from tqdm import tqdm
+
+import fd_wrapper
 
 __cached_instance = None
 

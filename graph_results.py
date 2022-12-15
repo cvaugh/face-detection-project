@@ -1,18 +1,33 @@
-import fd_wrapper as wrapper
-import numpy as np
 import os
-from tqdm import tqdm
-from fnmatch import filter
-from csv import reader
-import matplotlib.pyplot as plt
 from colorsys import hsv_to_rgb
+from csv import reader
+from fnmatch import filter
+
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
+import fd_wrapper as wrapper
 
 results_dir = wrapper.relative_path("./results/200_old/hue", root=__file__)
+out_file = "hue.png"
+subtitle = "Hue (0-255)"
+graphing = "hue" # must be one of "hue", "saturation", "value", or None
+positive_only = True
+negative_only = False
+
+if positive_only and negative_only:
+    print("Only one of 'positive_only' and 'negative_only' may be true")
+    exit()
 
 paths = []
 for root, dirs, files in os.walk(results_dir):
     for path in filter(files, "*.csv"):
         paths.append(os.path.join(root, path))
+
+if len(paths) == 0:
+    print("No CSV files found")
+    exit()
 
 shifts = [int(os.path.splitext(os.path.basename(path))[0]) for path in paths]
 
@@ -28,7 +43,12 @@ for i in tqdm(range(len(entries))):
         next(f) # skip header
         r = reader(f, delimiter=",")
         for line in r:
-            entry["results"].append(line)
+            e = np.array(line[1:len(line)], dtype=int)
+            if positive_only and e[len(e) - 1] == 0:
+                continue
+            if negative_only and e[len(e) - 1] == 1:
+                continue
+            entry["results"].append(e)
     entry["results"] = np.array(entry["results"])
     entries[i] = entry
 
@@ -39,21 +59,30 @@ results = [None] * len(detectors)
 image_count = len(entries[0]["results"])
 
 fig, ax = plt.subplots(len(detectors) + 1, sharex=True)
-fig.suptitle("Accuracy when classifying " + str(image_count) + " known images")
+fig.suptitle("Accuracy when classifying " + str(image_count) + " known" + ("-positive" if positive_only else "-negative" if negative_only else "") + " images")
 fig.tight_layout()
 
-graphing = "hue"
-graph_xlabel = "Hue (0-255)"
+graph_xlabel = subtitle
 
 line_color = "blue" if graphing is None else "gray"
 
-for i in range(len(detectors)):
-    results[i] = np.array([100 * np.sum(entry["results"][:, i + 1].astype(int) == entry["results"][:, 5].astype(int)) / image_count for entry in entries])
-
-y_min = np.min(results)
+y_min = float('inf')
+y_max = float('-inf')
 
 for i in range(len(detectors)):
-    ax[i].set_ylim(y_min, 100)
+    results[i] = np.array([100 * np.sum(entry["results"][:, i] == entry["results"][:, len(detectors)]) / image_count for entry in entries])
+    if np.any(results[i] != 0.0):
+        y_min = np.min([y_min, np.min(results[i])])
+        y_max = np.max([y_max, np.max(results[i])])
+
+if y_min == y_max:
+    y_min -= 0.01
+    y_max += 0.01
+y_range = y_max - y_min
+y_padding = y_range / 10
+
+for i in tqdm(range(len(detectors))):
+    ax[i].set_ylim(y_min - y_padding, y_max + y_padding)
     ax[i].set_title(detectors[i])
     ax[i].set_ylabel("Accuracy (percent)")
     ax[i].plot(shifts, results[i], color=line_color, linewidth=1)
@@ -71,9 +100,14 @@ for i in range(len(detectors)):
             ax[i].plot(j, results[i][j], color=color, marker="o", markersize=3)
     ax[len(detectors)].plot(shifts, results[i], linewidth=1)
     
-ax[len(detectors)].set_ylim(y_min, 100)
+ax[len(detectors)].set_ylim(y_min - y_padding, y_max + y_padding)
 ax[len(detectors)].set_title("All detectors")
 ax[len(detectors)].set_ylabel("Accuracy (percent)")
 ax[len(detectors)].set_xlabel(graph_xlabel)
 ax[len(detectors)].legend(detectors, loc="upper right", prop={"size": 8})
-plt.show()
+
+if out_file is None:
+    plt.show()
+else:
+    plt.gcf().set_size_inches(1920/96, 1200/96)
+    plt.savefig(out_file)

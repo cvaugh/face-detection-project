@@ -1,9 +1,11 @@
-import fd_wrapper as wrapper
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patheffects
-from matplotlib.colors import ListedColormap
 import csv
+
+import matplotlib.patheffects
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import ListedColormap
+
+import fd_wrapper as wrapper
 
 positive_file = wrapper.relative_path("./results/known_positive.csv", root=__file__)
 negative_file = wrapper.relative_path("./results/known_negative.csv", root=__file__)

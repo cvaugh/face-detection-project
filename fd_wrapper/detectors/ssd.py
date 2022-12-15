@@ -1,6 +1,6 @@
+import cv2
 from deepface.detectors.SsdWrapper import build_model
 from numpy import array
-import cv2
 from tqdm import tqdm
 
 __cached_instance = None

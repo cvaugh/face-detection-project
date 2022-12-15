@@ -1,9 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import fd_wrapper as wrapper
 from csv import reader
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from tqdm import tqdm
+
+import fd_wrapper as wrapper
 
 results_csv = wrapper.relative_path("./results/results_negative.csv", root=__file__)
 
