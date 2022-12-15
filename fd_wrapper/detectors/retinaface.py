@@ -24,3 +24,6 @@ def classify(images, instance=None, threshold=0.9, allow_upscaling=True):
         result = RetinaFace.detect_faces(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), threshold, instance, allow_upscaling)
         results.append(isinstance(result, dict))
     return results
+
+def name():
+    return "RetinaFace"

@@ -33,3 +33,6 @@ def classify(images, instance=None, target_size=(300, 300)):
     for image in progress:
         results.append(__classify_image(instance, image.resize(target_size), target_size))
     return results
+
+def name():
+    return "SSD"

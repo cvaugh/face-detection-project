@@ -30,3 +30,6 @@ def classify(images, instance=None, resize=(512, 512)):
         progress.update()
     progress.close()
     return results
+
+def name():
+    return "MTCNN"

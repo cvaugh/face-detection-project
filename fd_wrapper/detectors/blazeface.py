@@ -50,3 +50,6 @@ def classify(images, instance=None, batch_size=512, num_workers=0):
         dets = np.array([d.shape[0] for d in detections])
         results.append(dets != 0)
     return np.concatenate(results).tolist()
+
+def name():
+    return "BlazeFace"
