@@ -1,1 +1,1 @@
-__all__ = ["blazeface", "mtcnn", "retinaface", "ssd"]
+__all__ = ["blazeface", "insightface", "mtcnn", "retinaface", "ssd"]

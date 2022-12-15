@@ -29,7 +29,7 @@ def classify(images, instance=None, target_size=(300, 300)):
     results = []
     # to do: multithreading/optimization
     progress = tqdm(images)
-    progress.set_description("[SSD] Classifying images")
+    progress.set_description(f"[{name()}] Classifying images")
     for image in progress:
         results.append(__classify_image(instance, image.resize(target_size), target_size))
     return results

@@ -18,13 +18,13 @@ def classify(images, instance=None, resize=(512, 512)):
 
     images = [image.resize(resize) for image in images]
 
-    print("[MTCNN] Classifying images...", end="\r")
+    print(f"[{name()}] Classifying images...", end="\r")
     output = instance(images)
 
     results = [None] * len(images)
     
     progress = tqdm(total=len(images))
-    progress.set_description("[MTCNN] Processing results")
+    progress.set_description(f"[{name()}] Processing results")
     for index, (out, path) in enumerate(zip(output, images)):
         results[index] = out is not None
         progress.update()

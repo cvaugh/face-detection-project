@@ -44,7 +44,7 @@ def classify(images, instance=None, batch_size=512, num_workers=0):
     results = []
     # to do: optimize this loop
     progress = tqdm(dl)
-    progress.set_description("[BlazeFace] Classifying images")
+    progress.set_description(f"[{name()}] Classifying images")
     for image in progress:
         detections = instance.predict_on_batch(image)
         dets = np.array([d.shape[0] for d in detections])

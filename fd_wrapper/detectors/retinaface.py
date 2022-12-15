@@ -19,7 +19,7 @@ def classify(images, instance=None, threshold=0.9, allow_upscaling=True):
     if instance is None: instance = __get_cached_instance()
     results = []
     progress = tqdm(images)
-    progress.set_description("[RetinaFace] Classifying images")
+    progress.set_description(f"[{name()}] Classifying images")
     for image in progress:
         result = RetinaFace.detect_faces(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), threshold, instance, allow_upscaling)
         results.append(isinstance(result, dict))
