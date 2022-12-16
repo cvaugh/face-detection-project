@@ -40,6 +40,7 @@ def load_images(paths, image_size=None, silent=False, as_ndarray=False):
     return [load_image(path, image_size, as_ndarray) for path in iter]
 
 def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_to=None):
+    # to do: load into dictionary of attributes
     with open(path) as file:
         r = csv.reader(file, delimiter="\t")
         faces = []
@@ -83,9 +84,6 @@ def average_image(images, silent=False):
     avg = np.array(np.round(avg), dtype=np.uint8)
     return avg
 
-def classify_transform():
-    raise NotImplementedError
-
 def classify_batches(batches, detectors, transform=None, transform_offset=0):
     results = [None for batch in batches]
     batch_start_time = time()
@@ -99,7 +97,7 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
         if transform is not None:
             progress = tqdm(images)
             progress.set_description("Transforming images")
-            # to do: performance improvements, multithreading
+            # to do: improve performance
             images = [transform(image, transform_offset) for image in progress]
 
         results[i] = { detector.name(): detector.classify(images) for detector in detectors }
@@ -120,6 +118,24 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
             results_dict[detector.name()].extend(entry[detector.name()])
     
     return results_dict
+
+def classify_sets(paths, batch_size, detectors, transform, start_index=0, set_count=255, truth_override=None):
+    batches = create_batches(paths, batch_size)
+    batch_count = len(batches)
+    print(f"Found {len(paths)} images ({batch_count} {'batch' if batch_count == 1 else 'batches'} of size {batch_size})")
+    start_time = time()
+    durations = []
+    for i in range(max(0, start_index), set_count):
+        start_time = time()
+        print(f"\n(Set {i}/{set_count}) ", end="")
+        write_results(paths, classify_batches(batches, detectors, transform, i),
+                              detectors, f"results_temp/{str(i)}.csv", True, truth_override)
+        duration = time() - start_time
+        durations.append(duration)
+        remaining = set_count - i - 1
+        print(f"{remaining} set(s) remaining ({timedelta(seconds=np.sum(durations))}",
+              f" elapsed, ~{timedelta(seconds=np.mean(durations[-5:]) * remaining)} remaining)")
+    print(f"\n\nCompleted in {timedelta(seconds=time() - start_time)}")
 
 def write_results(paths, results, detectors, path, known=False, truth_override=None):
     Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
