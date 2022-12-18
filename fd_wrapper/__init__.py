@@ -119,7 +119,9 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
     
     return results_dict
 
-def classify_sets(paths, batch_size, detectors, transform, start_index=0, set_count=255, truth_override=None):
+def classify_sets(paths, detectors, transform=None, batch_size=128, truncate_paths=0, start_index=0, set_count=255, truth_override=None):
+    if truncate_paths > 0:
+        paths = paths[:truncate_paths]
     batches = create_batches(paths, batch_size)
     batch_count = len(batches)
     print(f"Found {len(paths)} images ({batch_count} {'batch' if batch_count == 1 else 'batches'} of size {batch_size})")
