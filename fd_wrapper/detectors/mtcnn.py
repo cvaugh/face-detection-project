@@ -1,3 +1,5 @@
+import torch
+import torch.cuda
 from facenet_pytorch import MTCNN
 from tqdm import tqdm
 
@@ -16,6 +18,7 @@ def classify(images, instance=None, resize=(512, 512)):
     if not isinstance(images, list): images = [images]
     if instance is None: instance = __get_cached_instance()
 
+    print(f"[{name()}] Resizing images...", end="\r")
     images = [image.resize(resize) for image in images]
 
     print(f"[{name()}] Classifying images...", end="\r")
