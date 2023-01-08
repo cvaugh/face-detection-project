@@ -1,5 +1,5 @@
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 from scipy import fftpack
 
 def _low_high_pass(im, radius, low=1):
@@ -73,3 +73,8 @@ def value_rotation(image, rot):
 
 def gaussian_blur(image, radius):
     return image.filter(ImageFilter.GaussianBlur(radius))
+
+def posterize(image, bits):
+    if bits > 8:
+        return image
+    return ImageOps.posterize(image, bits)
