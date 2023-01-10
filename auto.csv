@@ -1,0 +1,8 @@
+Transform, Start, End, Step
+hue_rotation, 0, 255
+saturation_rotation, 0, 255
+value_rotation, 0, 255
+low_pass, 0, 127
+high_pass, 0, 127
+gaussian_blur, 0, 99
+posterize, 0, 255

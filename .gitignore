@@ -13,5 +13,4 @@ experiments/
 result*/
 pillow_testing.py
 *.png
-*.inst
 images/
