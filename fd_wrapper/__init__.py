@@ -122,7 +122,8 @@ def classify_batches(batches, detectors, transform=None, transform_offset=0):
     
     return results_dict
 
-def classify_sets(paths, detectors, transform=None, batch_size=128, truncate_paths=0, start_index=0, set_count=1, truth_override=None):
+def classify_sets(paths, detectors, transform=None, batch_size=128, truncate_paths=0, start_index=0, set_count=1,
+                  truth_override=None, results_dir="results_temp"):
     if truncate_paths > 0:
         paths = paths[:truncate_paths]
     batches = create_batches(paths, batch_size)
@@ -134,7 +135,7 @@ def classify_sets(paths, detectors, transform=None, batch_size=128, truncate_pat
         start_time = time()
         print(f"\n(Set {i + 1}/{set_count}) ", end="")
         write_results(paths, classify_batches(batches, detectors, transform, i),
-                              detectors, f"results_temp/{str(i)}.csv", True, truth_override)
+                              detectors, f"{results_dir}/{str(i)}.csv", True, truth_override)
         duration = time() - start_time
         durations.append(duration)
         remaining = set_count - i - 1
