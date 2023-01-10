@@ -1,4 +1,4 @@
-Transform, Start, End, Step
+Transform, Start, End
 hue_rotation, 0, 255
 saturation_rotation, 0, 255
 value_rotation, 0, 255
