@@ -57,15 +57,14 @@ def get_ground_truth(path, split_path_at=None, path_separator=os.sep, relative_t
                 else:
                     row[0] = os.path.join(relative_to,
                              row[0][row[0].index(split_path_at) + len(split_path_at) + len(path_separator):])
-            match row[1]:
-                case "FACE":
-                    faces.append(row[0])
-                case "NOT_FACE":
-                    not_faces.append(row[0])
-                case "AMBIGUOUS":
-                    ambiguous.append(row[0])
-                case _:
-                    unclassified.append(row[0])
+            if row[1] == "FACE":
+                faces.append(row[0])
+            elif row[1] == "NOT_FACE":
+                not_faces.append(row[0])
+            elif row[1] == "AMBIGUOUS":
+                ambiguous.append(row[0])
+            else:
+                unclassified.append(row[0])
         return faces, not_faces, ambiguous, unclassified
 
 def create_batches(items, batch_size=128):
@@ -230,15 +229,14 @@ def graph_results(results_dir, detectors, results_file_filter="*.csv", out_file=
         ax[i].plot(shifts, results[i], color=line_color, linewidth=1)
         if graphing is not None:
             for j in range(0, np.max(shifts) + 1):
-                match graphing:
-                    case "hue":
-                        color = hsv_to_rgb(j / 255, 1, 1)
-                    case "saturation":
-                        color = hsv_to_rgb(0, j / 255, 0.9)
-                    case "value":
-                        color = hsv_to_rgb(0, 1, j / 255)
-                    case _:
-                        color = "red"
+                if graphing == "hue":
+                    color = hsv_to_rgb(j / 255, 1, 1)
+                elif graphing == "saturation":
+                    color = hsv_to_rgb(0, j / 255, 0.9)
+                elif graphing == "value":
+                    color = hsv_to_rgb(0, 1, j / 255)
+                else:
+                    color = "red"
                 ax[i].plot(j, results[i][j], color=color, marker="o", markersize=3)
         ax[len(dets)].plot(shifts, results[i], linewidth=1)
     progress.close()
